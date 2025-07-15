@@ -10,6 +10,7 @@ from sqlalchemy import Integer, String, Text, desc
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+from notif import Notification
 import os
 
 
@@ -257,29 +258,27 @@ def about():
     return render_template("about.html", current_user=current_user)
 
 
-@app.route("/contact", methods=["GET", "POST"])
-def contact():
-    return render_template("contact.html", current_user=current_user)
-
-
-# MAIL_ADDRESS = os.environ.get("EMAIL_KEY")
-# MAIL_APP_PW = os.environ.get("PASSWORD_KEY")
-
 # @app.route("/contact", methods=["GET", "POST"])
 # def contact():
-#     if request.method == "POST":
-#         data = request.form
-#         send_email(data["name"], data["email"], data["phone"], data["message"])
-#         return render_template("contact.html", msg_sent=True)
-#     return render_template("contact.html", msg_sent=False)
-#
-#
-# def send_email(name, email, phone, message):
-#     email_message = f"Subject:New Message\n\nName: {name}\nEmail: {email}\nPhone: {phone}\nMessage:{message}"
-#     with smtplib.SMTP("smtp.gmail.com") as connection:
-#         connection.starttls()
-#         connection.login(MAIL_ADDRESS, MAIL_APP_PW)
-#         connection.sendmail(MAIL_ADDRESS, MAIL_APP_PW, email_message)
+#     return render_template("contact.html", current_user=current_user)
+
+
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        data = request.form  # gets data from html forms
+        # send_email(data["name"], data["email"], data["phone"], data["message"])
+
+        name = data["name"]  # data from html form assign to variables
+        email = data["email"]
+        phone = data["phone"]
+        message = data["message"]
+
+        send_notification = Notification(name, email, phone, message) # creates object from Notification class
+        send_notification.send_email()
+
+        return render_template("contact.html", msg_sent=True)
+    return render_template("contact.html", msg_sent=False)
 
 
 if __name__ == "__main__":
