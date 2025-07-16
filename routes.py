@@ -88,7 +88,7 @@ def logout():
 
 @views.route('/')
 def get_all_posts():
-    result = db.session.execute(db.select(BlogPost).order_by(desc(BlogPost.id)))
+    result = db.session.execute(db.select(BlogPost).order_by(desc(BlogPost.id)).limit(3))
     posts = result.scalars().all()
     return render_template("index.html", all_posts=posts, current_user=current_user)
 
