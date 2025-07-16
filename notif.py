@@ -15,5 +15,5 @@ class Notification:
             connection.login(user=os.getenv("MY_MAIL_ADDRESS"), password=os.getenv("MAIL_APP_PW"))
             connection.sendmail(from_addr=self.sender_email,
                                 to_addrs=os.getenv("MY_MAIL_ADDRESS"),
-                                msg=f"Subject:Blog Message from {self.sender_name} Email {self.sender_email} "
-                                    f"Phone {self.sender_phone}\n\n{self.sender_message}")
+                                msg=f"Subject:New Blog Message From {self.sender_name} \n\n Email: {self.sender_email} "
+                                    f"\n\nPhone: {self.sender_phone}\n\n{self.sender_message}")
