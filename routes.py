@@ -93,6 +93,13 @@ def get_all_posts():
     return render_template("index.html", all_posts=posts, current_user=current_user)
 
 
+@views.route('/blog-archive')
+def blog_archive():
+    result = db.session.execute(db.select(BlogPost).order_by(desc(BlogPost.id)))
+    posts = result.scalars().all()
+    return render_template("all_posts.html", all_posts=posts, current_user=current_user)
+
+
 # View post
 @views.route("/post/<int:post_id>", methods=["GET", "POST"])
 def show_post(post_id):
