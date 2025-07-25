@@ -172,6 +172,15 @@ def delete_post(post_id):
     return redirect(url_for('views.get_all_posts'))
 
 
+@views.route("/delete-comment/<int:comment_id>/<int:post_id>")
+def delete_comment(comment_id, post_id):
+    comment_to_delete = db.get_or_404(Comment, comment_id)
+    db.session.delete(comment_to_delete)
+    db.session.commit()
+    return redirect(url_for('views.show_post', post_id=post_id)) # post id is the id of the blogpost
+
+
+
 @views.route("/about")
 def about():
     return render_template("about.html", current_user=current_user)

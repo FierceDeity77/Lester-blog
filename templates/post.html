@@ -40,9 +40,9 @@
 
         <!-- Comments Area -->
         <!-- Load the CKEditor -->
-        {{ ckeditor.load() }}
+        {# {{ ckeditor.load() }}
         <!-- Configure it with the name of the form field from CommentForm -->
-        {{ ckeditor.config(name='comment_text') }}
+        {{ ckeditor.config(name='comment_text') }}  #}
         <!-- Create the wtf quick form from CommentForm -->
         {{ render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
         <div class="comment">
@@ -58,6 +58,10 @@
               <div class="commentText">
                 {{comment.text|safe}}
                 <span class="sub-text">{{comment.comment_author.name}}</span>
+
+                {% if current_user.id == comment.comment_author.id or current_user.id == 4 %}
+                <a href="{{url_for('views.delete_comment', comment_id=comment.id, post_id=post.id) }}">✘</a>
+                {% endif %}
               </div>
             </li>
             {% endfor %}
