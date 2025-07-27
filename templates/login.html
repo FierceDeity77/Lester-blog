@@ -33,9 +33,12 @@
       <div class="col-lg-8 col-md-10 mx-auto">
         <!--Rendering login form here-->
         {{render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+        <a href="{{ url_for('views.account_recovery') }}" id="forgot-password-link"> Forgot Password? </a>
       </div>
     </div>
   </div>
+
+
 </main>
 
 

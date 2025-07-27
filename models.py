@@ -1,8 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+from itsdangerous import URLSafeTimedSerializer
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import Integer, String, Text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
+from flask import current_app
 
 
 # create database
@@ -43,6 +45,19 @@ class User(UserMixin, db.Model):
     posts = relationship("BlogPost", back_populates="author")
     # Parent relationship: "comment_author" refers to the comment_author property in the Comment class.
     comments = relationship("Comment", back_populates="comment_author")
+
+    def get_reset_token(self):
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id}, salt='password-reset-salt')
+
+    @staticmethod
+    def verify_reset_token(token, expiration=1800):
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, salt='password-reset-salt', max_age=expiration)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
 
 
 # Table for the comments on the blog posts

@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy import desc
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
-from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, RecoveryForm, ResetPasswordForm
 from notif import Notification
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_user, current_user, logout_user
@@ -177,8 +177,62 @@ def delete_comment(comment_id, post_id):
     comment_to_delete = db.get_or_404(Comment, comment_id)
     db.session.delete(comment_to_delete)
     db.session.commit()
-    return redirect(url_for('views.show_post', post_id=post_id)) # post id is the id of the blogpost
+    return redirect(url_for('views.show_post', post_id=post_id))  # post id is the id of the blogpost
 
+
+@views.route("/recovery", methods=["GET", "POST"])
+def account_recovery():
+    recovery_form = RecoveryForm()
+    if recovery_form.validate_on_submit():
+        result = db.session.execute(db.select(User).where(User.email == recovery_form.email.data))
+        user = result.scalar()
+
+        # Email doesn't exist
+        if not user:
+            flash("That email does not exist, please try again.")
+            return redirect(url_for('views.account_recovery'))
+        else:
+            token = user.get_reset_token()
+            link = url_for('views.reset_password', token=token, _external=True)
+
+            subject = 'Reset Your Password'
+            frm = 'Admin'
+            to = user.email
+            msg = (f"Hi,Thanks for checking out my blog! I really appreciate your support.  "
+                   f"Hope you enjoyed what you read! \n\nclick the link to change your password {link}")
+
+            notif = Notification(subject, frm, to, msg)
+            notif.send_email()
+
+            flash('Password reset email sent. Check your inbox.', 'success')
+    return render_template("forgot.html", current_user=current_user, form=recovery_form)
+
+
+@views.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    reset_password_form = ResetPasswordForm()
+    user = User.verify_reset_token(token)
+    if not user:
+        flash('That is an invalid or expired token.', 'danger')
+        return redirect(url_for('account_recovery'))
+
+    if request.method == 'POST':
+        password = reset_password_form.password.data
+        confirm_password = reset_password_form.confirm_password.data
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "danger")
+            return redirect(request.url)
+
+        # 🔐 Hash the password before saving
+        hashed_pw = generate_password_hash(password)
+
+        user.password = hashed_pw
+        db.session.commit()
+        flash('Your password has been updated!', 'success')
+        return redirect(url_for('views.login'))
+
+    return render_template('reset.html', form=reset_password_form)
 
 
 @views.route("/about")
@@ -196,7 +250,7 @@ def contact():
         phone = data["phone"]
         message = data["message"]
 
-        send_notification = Notification(name, email, phone, message) # creates object from Notification class
+        send_notification = Notification(name, email, phone, message)  # creates object from Notification class
         send_notification.send_email()
 
         return render_template("contact.html", msg_sent=True)
