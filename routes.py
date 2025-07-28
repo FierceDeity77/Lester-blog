@@ -36,7 +36,7 @@ def register():
         user = result.scalar()
         if user:
             # User already exists
-            flash("You've already signed up with that email, log in instead!")
+            flash("You've already signed up with that email, log in instead!", "danger")
             return redirect(url_for('views.login'))
 
         hash_and_salted_password = generate_password_hash(
@@ -67,11 +67,11 @@ def login():
         user = result.scalar()
         # Email doesn't exist
         if not user:
-            flash("That email does not exist, please try again.")
+            flash("That email does not exist, please try again.", "danger")
             return redirect(url_for('views.login'))
         # Password incorrect
         elif not check_password_hash(user.password, password):
-            flash('Password incorrect, please try again.')
+            flash('Password incorrect, please try again.', "danger")
             return redirect(url_for('views.login'))
         else:
             login_user(user)
@@ -109,7 +109,7 @@ def show_post(post_id):
     # Only allow logged-in users to comment on posts
     if comment_form.validate_on_submit():
         if not current_user.is_authenticated:
-            flash("You need to login or register to comment.")
+            flash("You need to login or register to comment.", "danger")
             return redirect(url_for("views.login"))
 
         new_comment = Comment(
@@ -189,7 +189,7 @@ def account_recovery():
 
         # Email doesn't exist
         if not user:
-            flash("That email does not exist, please try again.")
+            flash("That email does not exist, please try again.", "danger")
             return redirect(url_for('views.account_recovery'))
         else:
             token = user.get_reset_token()
@@ -212,13 +212,15 @@ def account_recovery():
 def reset_password(token):
     reset_password_form = ResetPasswordForm()
     user = User.verify_reset_token(token)
-    if not user:
-        flash('That is an invalid or expired token.', 'danger')
-        return redirect(url_for('account_recovery'))
 
-    if request.method == 'POST':
+    # if request.method == 'POST':
+    if reset_password_form.validate_on_submit():
         password = reset_password_form.password.data
         confirm_password = reset_password_form.confirm_password.data
+
+        if not user:
+            flash('That is an invalid or expired token.', 'danger')
+            return redirect(url_for('account_recovery'))
 
         if password != confirm_password:
             flash("Passwords do not match.", "danger")
