@@ -196,9 +196,9 @@ def account_recovery():
             link = url_for('views.reset_password', token=token, _external=True)
 
             subject = 'Reset Your Password'
-            frm = 'Admin'
+            frm = 'Hi!'
             to = user.email
-            msg = (f"Hi,Thanks for checking out my blog! I really appreciate your support.  "
+            msg = (f"Thanks for checking out my blog! I really appreciate your support.  "
                    f"Hope you enjoyed what you read! \n\nclick the link to change your password {link}")
 
             notif = Notification(subject, frm, to, msg)
@@ -253,7 +253,7 @@ def contact():
         message = data["message"]
 
         send_notification = Notification(name, email, phone, message)  # creates object from Notification class
-        send_notification.send_email()
-
-        return render_template("contact.html", msg_sent=True)
-    return render_template("contact.html", msg_sent=False)
+        send_notification.contact_email()
+        flash('Your Message Has Been Sent Successfully!', 'success')
+        return redirect(url_for('views.contact'))
+    return render_template("contact.html")
