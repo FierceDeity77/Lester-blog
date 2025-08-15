@@ -1,11 +1,10 @@
-from flask import Blueprint, abort
+from flask import Blueprint, abort, render_template, redirect, url_for, flash, request
 from datetime import date
 from sqlalchemy import desc
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, RecoveryForm, ResetPasswordForm
 from notif import Notification
-from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_user, current_user, logout_user
 from models import BlogPost, User, Comment, db
 
@@ -119,7 +118,8 @@ def show_post(post_id):
         )
         db.session.add(new_comment)
         db.session.commit()
-    return render_template("post.html", post=requested_post, current_user=current_user, form=comment_form)
+    return render_template("post.html", post=requested_post,
+                           current_user=current_user, form=comment_form)
 
 
 @views.route("/new-post", methods=["GET", "POST"])

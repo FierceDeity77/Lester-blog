@@ -57,9 +57,10 @@
 
               </div>
               <div class="commentText">
-                {{comment.text|safe}}
 
                 <span class="sub-text">{{comment.comment_author.name}}</span>
+                <div>{{comment.text|safe}}</div>
+
 
                 {% if current_user.id == comment.comment_author.id or current_user.id == 4 %}
                 <a href="{{url_for('views.delete_comment', comment_id=comment.id, post_id=post.id) }}" id="delete-comment-link">Delete</a>
